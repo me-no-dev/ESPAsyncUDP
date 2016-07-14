@@ -11,6 +11,64 @@ extern "C" {
 #include "lwip/igmp.h"
 }
 
+AsyncUDPMessage::AsyncUDPMessage(size_t size)
+{
+    _index = 0;
+    if(size > 1460) {
+        size = 1460;
+    }
+    _size = size;
+    _buffer = (uint8_t *)malloc(size);
+}
+
+AsyncUDPMessage::~AsyncUDPMessage()
+{
+    if(_buffer) {
+        free(_buffer);
+    }
+}
+
+size_t AsyncUDPMessage::write(const uint8_t *data, size_t len)
+{
+    if(_buffer == NULL) {
+        return 0;
+    }
+    size_t s = space();
+    if(len > s) {
+        len = s;
+    }
+    memcpy(_buffer + _index, data, len);
+    _index += len;
+    return len;
+}
+
+size_t AsyncUDPMessage::write(uint8_t data)
+{
+    return write(&data, 1);
+}
+
+size_t AsyncUDPMessage::space()
+{
+    if(_buffer == NULL) {
+        return 0;
+    }
+    return _size - _index;
+}
+
+uint8_t * AsyncUDPMessage::data()
+{
+    return _buffer;
+}
+
+size_t AsyncUDPMessage::length()
+{
+    return _index;
+}
+
+void AsyncUDPMessage::flush()
+{
+    _index = 0;
+}
 
 
 AsyncUDPPacket::AsyncUDPPacket(AsyncUDP *udp, ip_addr_t *localIp, uint16_t localPort, ip_addr_t *remoteIp, uint16_t remotePort, uint8_t *data, size_t len)
@@ -77,6 +135,11 @@ size_t AsyncUDPPacket::write(const uint8_t *data, size_t len)
 size_t AsyncUDPPacket::write(uint8_t data)
 {
     return write(&data, 1);
+}
+
+size_t AsyncUDPPacket::send(AsyncUDPMessage &message)
+{
+    return write(message.data(), message.length());
 }
 
 
@@ -296,8 +359,6 @@ size_t AsyncUDP::broadcast(uint8_t *data, size_t len)
 {
     if(_pcb->local_port != 0) {
         return broadcast(data, len, _pcb->local_port);
-    } else if(_pcb->remote_port != 0) {
-        return broadcast(data, len, _pcb->remote_port);
     }
     return 0;
 }
@@ -305,4 +366,45 @@ size_t AsyncUDP::broadcast(uint8_t *data, size_t len)
 size_t AsyncUDP::broadcast(const char * data)
 {
     return broadcast((uint8_t *)data, strlen(data));
+}
+
+
+size_t AsyncUDP::send(AsyncUDPMessage &message, ip_addr_t *addr, uint16_t port)
+{
+    if(!message){
+      return 0;
+    }
+    return write(message.data(), message.length(), addr, port);
+}
+
+size_t AsyncUDP::send(AsyncUDPMessage &message, const IPAddress addr, uint16_t port)
+{
+    if(!message){
+      return 0;
+    }
+    return write(message.data(), message.length(), addr, port);
+}
+
+size_t AsyncUDP::send(AsyncUDPMessage &message)
+{
+    if(!message){
+      return 0;
+    }
+    return write(message.data(), message.length(), &(_pcb->remote_ip), _pcb->remote_port);
+}
+
+size_t AsyncUDP::broadcast(AsyncUDPMessage &message, uint16_t port)
+{
+    if(!message){
+      return 0;
+    }
+    return broadcast(message.data(), message.length(), port);
+}
+
+size_t AsyncUDP::broadcast(AsyncUDPMessage &message)
+{
+    if(!message){
+      return 0;
+    }
+    return broadcast(message.data(), message.length());
 }

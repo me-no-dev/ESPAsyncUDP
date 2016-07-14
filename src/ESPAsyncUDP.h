@@ -13,8 +13,30 @@ extern "C" {
 
 class AsyncUDP;
 class AsyncUDPPacket;
+class AsyncUDPMessage;
 struct udp_pcb;
 struct pbuf;
+
+class AsyncUDPMessage : public Print
+{
+protected:
+    uint8_t *_buffer;
+    size_t _index;
+    size_t _size;
+public:
+    AsyncUDPMessage(size_t size=1460);
+    ~AsyncUDPMessage();
+    size_t write(const uint8_t *data, size_t len);
+    size_t write(uint8_t data);
+    size_t space();
+    uint8_t * data();
+    size_t length();
+    void flush();
+    operator bool()
+    {
+        return _buffer != NULL;
+    }
+};
 
 class AsyncUDPPacket : public Print
 {
@@ -39,6 +61,8 @@ public:
     uint16_t localPort();
     IPAddress remoteIP();
     uint16_t remotePort();
+
+    size_t send(AsyncUDPMessage &message);
 
     size_t write(const uint8_t *data, size_t len);
     size_t write(uint8_t data);
@@ -84,6 +108,13 @@ public:
     size_t broadcast(const char * data, uint16_t port);
     size_t broadcast(uint8_t *data, size_t len);
     size_t broadcast(const char * data);
+
+    size_t send(AsyncUDPMessage &message, ip_addr_t *addr, uint16_t port);
+    size_t send(AsyncUDPMessage &message, const IPAddress addr, uint16_t port);
+    size_t send(AsyncUDPMessage &message);
+
+    size_t broadcast(AsyncUDPMessage &message, uint16_t port);
+    size_t broadcast(AsyncUDPMessage &message);
 
     bool connected();
     operator bool()
