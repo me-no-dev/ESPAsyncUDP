@@ -371,40 +371,40 @@ size_t AsyncUDP::broadcast(const char * data)
 
 size_t AsyncUDP::send(AsyncUDPMessage &message, ip_addr_t *addr, uint16_t port)
 {
-    if(!message){
-      return 0;
+    if(!message) {
+        return 0;
     }
     return write(message.data(), message.length(), addr, port);
 }
 
 size_t AsyncUDP::send(AsyncUDPMessage &message, const IPAddress addr, uint16_t port)
 {
-    if(!message){
-      return 0;
+    if(!message) {
+        return 0;
     }
     return write(message.data(), message.length(), addr, port);
 }
 
 size_t AsyncUDP::send(AsyncUDPMessage &message)
 {
-    if(!message){
-      return 0;
+    if(!message) {
+        return 0;
     }
     return write(message.data(), message.length(), &(_pcb->remote_ip), _pcb->remote_port);
 }
 
 size_t AsyncUDP::broadcast(AsyncUDPMessage &message, uint16_t port)
 {
-    if(!message){
-      return 0;
+    if(!message) {
+        return 0;
     }
     return broadcast(message.data(), message.length(), port);
 }
 
 size_t AsyncUDP::broadcast(AsyncUDPMessage &message)
 {
-    if(!message){
-      return 0;
+    if(!message) {
+        return 0;
     }
     return broadcast(message.data(), message.length());
 }
