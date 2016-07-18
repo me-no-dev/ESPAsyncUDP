@@ -68,7 +68,8 @@ public:
     size_t write(uint8_t data);
 };
 
-typedef std::function<void(void*, AsyncUDPPacket packet)> AuPacketHandlerFunction;
+typedef std::function<void(AsyncUDPPacket& packet)> AuPacketHandlerFunction;
+typedef std::function<void(void * arg, AsyncUDPPacket& packet)> AuPacketHandlerFunctionWithArg;
 
 class AsyncUDP : public Print
 {
@@ -76,7 +77,6 @@ protected:
     udp_pcb *_pcb;
     bool _connected;
     AuPacketHandlerFunction _handler;
-    void * _handlerArg;
 
     void _recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, u16_t port);
     static void _s_recv(void *arg, udp_pcb *upcb, pbuf *p, struct ip_addr *addr, uint16_t port);
@@ -85,7 +85,8 @@ public:
     AsyncUDP();
     ~AsyncUDP();
 
-    void onPacket(AuPacketHandlerFunction cb, void * arg = NULL);
+    void onPacket(AuPacketHandlerFunctionWithArg cb, void * arg=NULL);
+    void onPacket(AuPacketHandlerFunction cb);
 
     bool listen(ip_addr_t *addr, uint16_t port);
     bool listen(const IPAddress addr, uint16_t port);

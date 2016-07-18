@@ -149,7 +149,6 @@ AsyncUDP::AsyncUDP()
     _pcb = NULL;
     _connected = false;
     _handler = NULL;
-    _handlerArg = NULL;
 }
 
 AsyncUDP::~AsyncUDP()
@@ -162,10 +161,14 @@ bool AsyncUDP::connected()
     return _connected;
 }
 
-void AsyncUDP::onPacket(AuPacketHandlerFunction cb, void * arg)
+void AsyncUDP::onPacket(AuPacketHandlerFunctionWithArg cb, void * arg)
+{
+    onPacket(std::bind(cb, arg, std::placeholders::_1));
+}
+
+void AsyncUDP::onPacket(AuPacketHandlerFunction cb)
 {
     _handler = cb;
-    _handlerArg = arg;
 }
 
 void AsyncUDP::_recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, u16_t port)
@@ -186,7 +189,8 @@ void AsyncUDP::_recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, u16_t port)
             raddr.addr = _pcb->remote_ip.addr;
             uint16_t rport = _pcb->remote_port;
 
-            _handler(_handlerArg, AsyncUDPPacket(this, &daddr, dport, addr, port, data, len));
+            AsyncUDPPacket packet(this, &daddr, dport, addr, port, data, len);
+            _handler(packet);
         }
 
         pbuf * this_pb = pb;

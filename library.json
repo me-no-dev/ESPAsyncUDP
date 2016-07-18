@@ -1,7 +1,7 @@
 {
   "name":"ESPAsyncUDP",
   "description":"Asynchronous UDP Library for ESP8266",
-  "keywords":"async,udp,server,client",
+  "keywords":"async,udp,server,client,multicast,broadcast",
   "authors":
   {
     "name": "Hristo Gochkov",
