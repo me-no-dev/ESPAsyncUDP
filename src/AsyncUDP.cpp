@@ -129,7 +129,7 @@ bool AsyncUDPPacket::isMulticast()
 
 size_t AsyncUDPPacket::write(const uint8_t *data, size_t len)
 {
-    return _udp->write(data, len, _remoteIp, _remotePort);
+    return _udp->writeTo(data, len, _remoteIp, _remotePort);
 }
 
 size_t AsyncUDPPacket::write(uint8_t data)
@@ -154,6 +154,11 @@ AsyncUDP::AsyncUDP()
 AsyncUDP::~AsyncUDP()
 {
     close();
+}
+
+AsyncUDP::operator bool()
+{
+    return _connected;
 }
 
 bool AsyncUDP::connected()
@@ -282,7 +287,7 @@ void AsyncUDP::close()
     }
 }
 
-size_t AsyncUDP::write(const uint8_t *data, size_t len, ip_addr_t *addr, uint16_t port)
+size_t AsyncUDP::writeTo(const uint8_t *data, size_t len, ip_addr_t *addr, uint16_t port)
 {
     if(!_pcb && !connect(addr, port)) {
         return 0;
@@ -330,16 +335,16 @@ bool AsyncUDP::connect(const IPAddress addr, uint16_t port)
     return connect(&daddr, port);
 }
 
-size_t AsyncUDP::write(const uint8_t *data, size_t len, const IPAddress addr, uint16_t port)
+size_t AsyncUDP::writeTo(const uint8_t *data, size_t len, const IPAddress addr, uint16_t port)
 {
     ip_addr_t daddr;
     daddr.addr = addr;
-    return write(data, len, &daddr, port);
+    return writeTo(data, len, &daddr, port);
 }
 
 size_t AsyncUDP::write(const uint8_t *data, size_t len)
 {
-    return write(data, len, &(_pcb->remote_ip), _pcb->remote_port);
+    return writeTo(data, len, &(_pcb->remote_ip), _pcb->remote_port);
 }
 
 size_t AsyncUDP::write(uint8_t data)
@@ -347,22 +352,22 @@ size_t AsyncUDP::write(uint8_t data)
     return write(&data, 1);
 }
 
-size_t AsyncUDP::broadcast(uint8_t *data, size_t len, uint16_t port)
+size_t AsyncUDP::broadcastTo(uint8_t *data, size_t len, uint16_t port)
 {
     ip_addr_t daddr;
     daddr.addr = 0xFFFFFFFF;
-    return write(data, len, &daddr, port);
+    return writeTo(data, len, &daddr, port);
 }
 
-size_t AsyncUDP::broadcast(const char * data, uint16_t port)
+size_t AsyncUDP::broadcastTo(const char * data, uint16_t port)
 {
-    return broadcast((uint8_t *)data, strlen(data), port);
+    return broadcastTo((uint8_t *)data, strlen(data), port);
 }
 
 size_t AsyncUDP::broadcast(uint8_t *data, size_t len)
 {
     if(_pcb->local_port != 0) {
-        return broadcast(data, len, _pcb->local_port);
+        return broadcastTo(data, len, _pcb->local_port);
     }
     return 0;
 }
@@ -373,20 +378,20 @@ size_t AsyncUDP::broadcast(const char * data)
 }
 
 
-size_t AsyncUDP::send(AsyncUDPMessage &message, ip_addr_t *addr, uint16_t port)
+size_t AsyncUDP::sendTo(AsyncUDPMessage &message, ip_addr_t *addr, uint16_t port)
 {
     if(!message) {
         return 0;
     }
-    return write(message.data(), message.length(), addr, port);
+    return writeTo(message.data(), message.length(), addr, port);
 }
 
-size_t AsyncUDP::send(AsyncUDPMessage &message, const IPAddress addr, uint16_t port)
+size_t AsyncUDP::sendTo(AsyncUDPMessage &message, const IPAddress addr, uint16_t port)
 {
     if(!message) {
         return 0;
     }
-    return write(message.data(), message.length(), addr, port);
+    return writeTo(message.data(), message.length(), addr, port);
 }
 
 size_t AsyncUDP::send(AsyncUDPMessage &message)
@@ -394,15 +399,15 @@ size_t AsyncUDP::send(AsyncUDPMessage &message)
     if(!message) {
         return 0;
     }
-    return write(message.data(), message.length(), &(_pcb->remote_ip), _pcb->remote_port);
+    return writeTo(message.data(), message.length(), &(_pcb->remote_ip), _pcb->remote_port);
 }
 
-size_t AsyncUDP::broadcast(AsyncUDPMessage &message, uint16_t port)
+size_t AsyncUDP::broadcastTo(AsyncUDPMessage &message, uint16_t port)
 {
     if(!message) {
         return 0;
     }
-    return broadcast(message.data(), message.length(), port);
+    return broadcastTo(message.data(), message.length(), port);
 }
 
 size_t AsyncUDP::broadcast(AsyncUDPMessage &message)

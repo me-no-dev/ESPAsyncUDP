@@ -100,28 +100,25 @@ public:
 
     void close();
 
-    size_t write(const uint8_t *data, size_t len, ip_addr_t *addr, uint16_t port);
-    size_t write(const uint8_t *data, size_t len, const IPAddress addr, uint16_t port);
+    size_t writeTo(const uint8_t *data, size_t len, ip_addr_t *addr, uint16_t port);
+    size_t writeTo(const uint8_t *data, size_t len, const IPAddress addr, uint16_t port);
     size_t write(const uint8_t *data, size_t len);
     size_t write(uint8_t data);
 
-    size_t broadcast(uint8_t *data, size_t len, uint16_t port);
-    size_t broadcast(const char * data, uint16_t port);
+    size_t broadcastTo(uint8_t *data, size_t len, uint16_t port);
+    size_t broadcastTo(const char * data, uint16_t port);
     size_t broadcast(uint8_t *data, size_t len);
     size_t broadcast(const char * data);
 
-    size_t send(AsyncUDPMessage &message, ip_addr_t *addr, uint16_t port);
-    size_t send(AsyncUDPMessage &message, const IPAddress addr, uint16_t port);
+    size_t sendTo(AsyncUDPMessage &message, ip_addr_t *addr, uint16_t port);
+    size_t sendTo(AsyncUDPMessage &message, const IPAddress addr, uint16_t port);
     size_t send(AsyncUDPMessage &message);
 
-    size_t broadcast(AsyncUDPMessage &message, uint16_t port);
+    size_t broadcastTo(AsyncUDPMessage &message, uint16_t port);
     size_t broadcast(AsyncUDPMessage &message);
 
     bool connected();
-    operator bool()
-    {
-        return connected();
-    }
+    operator bool();
 };
 
 #endif
