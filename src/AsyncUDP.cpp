@@ -2,9 +2,7 @@
 #include "ESPAsyncUDP.h"
 
 extern "C" {
-//#include "osapi.h"
-//#include "ets_sys.h"
-//#include "lwip/ip_addr.h"
+#include "user_interface.h"
 #include "lwip/opt.h"
 #include "lwip/inet.h"
 #include "lwip/udp.h"
@@ -176,7 +174,7 @@ void AsyncUDP::onPacket(AuPacketHandlerFunction cb)
     _handler = cb;
 }
 
-void AsyncUDP::_recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, u16_t port)
+void AsyncUDP::_recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, uint16_t port)
 {
     while(pb != NULL) {
         if(_handler) {
@@ -189,10 +187,6 @@ void AsyncUDP::_recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, u16_t port)
 
             udp_hdr* udphdr = reinterpret_cast<udp_hdr*>(((uint8_t*)((pb)->payload)) - UDP_HLEN);
             uint16_t dport = ntohs(udphdr->dest);
-
-            ip_addr_t raddr;
-            raddr.addr = _pcb->remote_ip.addr;
-            uint16_t rport = _pcb->remote_port;
 
             AsyncUDPPacket packet(this, &daddr, dport, addr, port, data, len);
             _handler(packet);

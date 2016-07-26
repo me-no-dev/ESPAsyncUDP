@@ -3,12 +3,6 @@
 
 #include "IPAddress.h"
 #include "Print.h"
-
-extern "C" {
-#include "osapi.h"
-#include "ets_sys.h"
-#include "user_interface.h"
-}
 #include <functional>
 
 class AsyncUDP;
@@ -16,6 +10,8 @@ class AsyncUDPPacket;
 class AsyncUDPMessage;
 struct udp_pcb;
 struct pbuf;
+struct ip_addr;
+typedef struct ip_addr ip_addr_t;
 
 class AsyncUDPMessage : public Print
 {
@@ -25,7 +21,7 @@ protected:
     size_t _size;
 public:
     AsyncUDPMessage(size_t size=1460);
-    ~AsyncUDPMessage();
+    virtual ~AsyncUDPMessage();
     size_t write(const uint8_t *data, size_t len);
     size_t write(uint8_t data);
     size_t space();
@@ -50,7 +46,7 @@ protected:
     size_t _len;
 public:
     AsyncUDPPacket(AsyncUDP *udp, ip_addr_t *localIp, uint16_t localPort, ip_addr_t *remoteIp, uint16_t remotePort, uint8_t *data, size_t len);
-    ~AsyncUDPPacket();
+    virtual ~AsyncUDPPacket();
 
     uint8_t * data();
     size_t length();
@@ -78,12 +74,12 @@ protected:
     bool _connected;
     AuPacketHandlerFunction _handler;
 
-    void _recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, u16_t port);
+    void _recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, uint16_t port);
     static void _s_recv(void *arg, udp_pcb *upcb, pbuf *p, struct ip_addr *addr, uint16_t port);
 
 public:
     AsyncUDP();
-    ~AsyncUDP();
+    virtual ~AsyncUDP();
 
     void onPacket(AuPacketHandlerFunctionWithArg cb, void * arg=NULL);
     void onPacket(AuPacketHandlerFunction cb);
