@@ -4,14 +4,20 @@
 #include "IPAddress.h"
 #include "Print.h"
 #include <functional>
+#include "lwip/init.h"
 
 class AsyncUDP;
 class AsyncUDPPacket;
 class AsyncUDPMessage;
 struct udp_pcb;
 struct pbuf;
+#if LWIP_VERSION_MAJOR == 1
 struct ip_addr;
 typedef struct ip_addr ip_addr_t;
+#else
+struct ip4_addr;
+typedef struct ip4_addr ip_addr_t;
+#endif
 
 class AsyncUDPMessage : public Print
 {
@@ -75,7 +81,11 @@ protected:
     AuPacketHandlerFunction _handler;
 
     void _recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, uint16_t port);
-    static void _s_recv(void *arg, udp_pcb *upcb, pbuf *p, struct ip_addr *addr, uint16_t port);
+#if LWIP_VERSION_MAJOR == 1
+    static void _s_recv(void *arg, udp_pcb *upcb, pbuf *p, ip_addr_t *addr, uint16_t port);
+#else
+    static void _s_recv(void *arg, udp_pcb *upcb, pbuf *p, const ip_addr_t *addr, uint16_t port);
+#endif
 
 public:
     AsyncUDP();

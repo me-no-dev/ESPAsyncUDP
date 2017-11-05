@@ -199,9 +199,13 @@ void AsyncUDP::_recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, uint16_t port)
     }
 }
 
-void AsyncUDP::_s_recv(void *arg, udp_pcb *upcb, pbuf *p, struct ip_addr *addr, uint16_t port)
+#if LWIP_VERSION_MAJOR == 1
+void AsyncUDP::_s_recv(void *arg, udp_pcb *upcb, pbuf *p, ip_addr_t *addr, uint16_t port)
+#else
+void AsyncUDP::_s_recv(void *arg, udp_pcb *upcb, pbuf *p, const ip_addr_t *addr, uint16_t port)
+#endif
 {
-    reinterpret_cast<AsyncUDP*>(arg)->_recv(upcb, p, addr, port);
+    reinterpret_cast<AsyncUDP*>(arg)->_recv(upcb, p, (ip_addr_t *)addr, port);
 }
 
 bool AsyncUDP::listen(ip_addr_t *addr, uint16_t port)
@@ -245,7 +249,11 @@ bool AsyncUDP::listenMulticast(ip_addr_t *addr, uint16_t port, uint8_t ttl)
     if(!listen(&multicast_if_addr, port)) {
         return false;
     }
+#if LWIP_VERSION_MAJOR == 1
     udp_set_multicast_netif_addr(_pcb, multicast_if_addr);
+#else
+    udp_set_multicast_netif_addr(_pcb, &multicast_if_addr);
+#endif
     udp_set_multicast_ttl(_pcb, ttl);
     ip_addr_copy(_pcb->remote_ip, *addr);
     _pcb->remote_port = port;
