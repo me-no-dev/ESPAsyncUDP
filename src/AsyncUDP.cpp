@@ -246,7 +246,7 @@ bool AsyncUDP::listenMulticast(ip_addr_t *addr, uint16_t port, uint8_t ttl)
     if (igmp_joingroup(&multicast_if_addr, addr)!= ERR_OK) {
         return false;
     }
-    if(!listen(&multicast_if_addr, port)) {
+    if(!listen(IPADDR_ANY, port)) {
         return false;
     }
 #if LWIP_VERSION_MAJOR == 1
