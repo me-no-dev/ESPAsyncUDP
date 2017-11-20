@@ -176,6 +176,7 @@ void AsyncUDP::onPacket(AuPacketHandlerFunction cb)
 
 void AsyncUDP::_recv(udp_pcb *upcb, pbuf *pb, ip_addr_t *addr, uint16_t port)
 {
+    (void)upcb; // its unused, avoid warning
     while(pb != NULL) {
         if(_handler) {
             uint8_t * data = (uint8_t*)((pb)->payload);
