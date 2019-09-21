@@ -347,7 +347,10 @@ size_t AsyncUDP::writeTo(const uint8_t *data, size_t len, const IPAddress addr, 
 
 size_t AsyncUDP::write(const uint8_t *data, size_t len)
 {
-    return writeTo(data, len, &(_pcb->remote_ip), _pcb->remote_port);
+	if(_pcb){
+		return writeTo(data, len, &(_pcb->remote_ip), _pcb->remote_port);
+	}
+    return 0;
 }
 
 size_t AsyncUDP::write(uint8_t data)
@@ -399,7 +402,7 @@ size_t AsyncUDP::sendTo(AsyncUDPMessage &message, const IPAddress addr, uint16_t
 
 size_t AsyncUDP::send(AsyncUDPMessage &message)
 {
-    if(!message) {
+    if((!message) || (!_pcb)) {
         return 0;
     }
     return writeTo(message.data(), message.length(), &(_pcb->remote_ip), _pcb->remote_port);
