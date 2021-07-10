@@ -40,7 +40,7 @@ public:
     }
 };
 
-class AsyncUDPPacket : public Print
+class AsyncUDPPacket : public Stream
 {
 protected:
     AsyncUDP *_udp;
@@ -50,6 +50,7 @@ protected:
     uint16_t _remotePort;
     uint8_t *_data;
     size_t _len;
+    size_t _index;
 public:
     AsyncUDPPacket(AsyncUDP *udp, ip_addr_t *localIp, uint16_t localPort, ip_addr_t *remoteIp, uint16_t remotePort, uint8_t *data, size_t len);
     virtual ~AsyncUDPPacket();
@@ -65,6 +66,12 @@ public:
     uint16_t remotePort();
 
     size_t send(AsyncUDPMessage &message);
+
+    int available();
+    int read(uint8_t *data, size_t len);
+    int read();
+    int peek();
+    void flush();
 
     size_t write(const uint8_t *data, size_t len);
     size_t write(uint8_t data);
