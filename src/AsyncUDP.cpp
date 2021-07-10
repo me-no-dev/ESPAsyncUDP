@@ -78,6 +78,7 @@ AsyncUDPPacket::AsyncUDPPacket(AsyncUDP *udp, ip_addr_t *localIp, uint16_t local
     _remotePort = remotePort;
     _data = data;
     _len = len;
+    _index = 0;
 }
 
 AsyncUDPPacket::~AsyncUDPPacket()
@@ -93,6 +94,40 @@ uint8_t * AsyncUDPPacket::data()
 size_t AsyncUDPPacket::length()
 {
     return _len;
+}
+
+int AsyncUDPPacket::available(){
+    return _len - _index;
+}
+
+int AsyncUDPPacket::read(uint8_t *data, size_t len){
+    size_t i;
+    size_t a = _len - _index;
+    if(len > a){
+        len = a;
+    }
+    for(i=0;i<len;i++){
+        data[i] = read();
+    }
+    return len;
+}
+
+int AsyncUDPPacket::read(){
+    if(_index < _len){
+        return _data[_index++];
+    }
+    return -1;
+}
+
+int AsyncUDPPacket::peek(){
+    if(_index < _len){
+        return _data[_index];
+    }
+    return -1;
+}
+
+void AsyncUDPPacket::flush(){
+    _index = _len;
 }
 
 IPAddress AsyncUDPPacket::localIP()
